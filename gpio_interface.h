@@ -1,25 +1,26 @@
 #pragma once
+#include <fstream>
 
 class GpioInterface
 {
 public:
 
-    using bool = value_type;
+    using value_type = bool;
     enum class GpioDirection {
         Input,
         Output
     };
 
-    bool exportGpio(int gpio) = 0;
-    bool isValidGpio(int gpio) = 0;
-    bool canSetDirection(int gpio) = 0;
+    virtual bool exportGpio(int gpio) = 0;
+    virtual bool isValidGpio(int gpio) = 0;
+    virtual bool canSetDirection(int gpio) = 0;
 
-    bool setDirectionInput(int gpio) = 0;
-    bool setDirectionOutput(int gpio, bool value_type) = 0;
-    GpioDirection getDirection(int gpio) = 0;
+    virtual bool setDirectionInput(int gpio) = 0;
+    virtual bool setDirectionOutput(int gpio, bool value_type) = 0;
+    virtual GpioDirection getDirection(int gpio) = 0;
 
-    bool setValue(int gpio, value_type value) = 0;
-    value_type getValue(int gpio) = 0;
+    virtual bool setValue(int gpio, value_type value) = 0;
+    virtual value_type getValue(int gpio) = 0;
 };
 
 static bool FileExists(const std::string& path) {
@@ -100,4 +101,23 @@ public:
 
     bool setValue(int gpio, value_type value) = 0;
     value_type getValue(int gpio) = 0;
+};
+
+class GpioInterfaceFactory
+{
+public:
+    static GpioInterface *interface()
+    {
+        if (!m_interface)
+	    return m_interface;
+
+	std::lock_guard<std::mutex> guard;
+	if (!m_interface)
+	{
+            m_interface = new SysfsGpio;
+	}
+    }
+private:
+    std::atomic<GpioInterface*> m_interface;
+    std::mutex m_lock;
 };

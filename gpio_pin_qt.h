@@ -4,7 +4,7 @@
 #include <QSocketNotifier>
 
 #include "gpio_pin.h"
-
+#include "gpio_interface.h"
 
 class QtGpioPin : public QObject, public GpioPin
 {
